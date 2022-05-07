@@ -1,1 +1,61 @@
-I glanced through your page and I have  business proposal for you, can I give you an insight ? 
+<p>&lt;!DOCTYPE html&gt;</p>
+<p><html></p>
+<p><head>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head></p>
+<body>
+  <div id="chart"></div>
+</body>
+
+JavaScript
+// jshint esnext: true
+// This API key is only for testing, don't use this in production
+const apiKey = 'coinrankingohlcexample';
+const url = 'https://api.coinranking.com/v2/coin/razxDUgYGNAdQ/ohlc';
+const queryString = new URLSearchParams({
+  interval: 'day',
+  limit: 30,
+  'x-access-token': apiKey,
+});
+const chartContainer = document.getElementById('chart');
+
+// Add the API key to the querystring
+fetch(`${url}?${queryString}`)
+  .then((response) => response.json())
+  .then((response) => {
+    if (response.status === 'success') {
+      const options = {
+        series: [{
+          data: response.data.ohlc.map((item) => ({
+            x: new Date(Number(item.endingAt) * 1000),
+            y: [item.open, item.high, item.low, item.close],
+          })),
+        }],
+        chart: {
+          type: 'candlestick',
+          height: 400,
+        },
+        title: {
+          text: 'Bitcoin price',
+          align: 'left',
+        },
+        xaxis: {
+          type: 'datetime',
+        },
+        yaxis: {
+          tooltip: {
+            enabled: true,
+          },
+        },
+      };
+
+      const chart = new ApexCharts(chartContainer, options);
+      chart.render();
+    } else {
+      // Show error message if the request failed
+      document.write(response.message);
+    }
+  })
+  .catch((error) => {
+    console.error(error);
+  });
